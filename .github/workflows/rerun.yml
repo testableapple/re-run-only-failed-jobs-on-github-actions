@@ -1,0 +1,79 @@
+name: Rerun only failed steps
+
+on: [pull_request]
+
+jobs:
+  fail:
+    runs-on: ubuntu-latest
+    name: Red
+    steps:
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +%s)"
+
+    - name: Set default run status
+      run: echo "::set-output name=last_run_status::default" > last_run_status
+
+    - name: Restore last run status
+      uses: actions/cache@v2
+      with:
+        path: |
+          last_run_status
+        key: ${{ github.run_id }}-${{ github.job }}-${{ steps.date.outputs.date }}
+        restore-keys: |
+          ${{ github.run_id }}-${{ github.job }}-
+
+    - name: Set last run status
+      id: last_run_status
+      run: cat last_run_status
+
+    - name: Checkout ref
+      uses: actions/checkout@v2
+
+    - name: Step
+      if: steps.last_run_status.outputs.last_run_status != 'success'
+      run: |
+        echo "I will fail!"
+        exit 1
+
+    - name: Save run status
+      if: steps.last_run_status.outputs.last_run_status != 'success'
+      run: echo "::set-output name=last_run_status::success" > last_run_status
+
+  pass:
+    runs-on: ubuntu-latest
+    name: Green
+    steps:
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+    - name: Set default run status
+      run: echo "::set-output name=last_run_status::default" > last_run_status
+
+    - name: Restore last run status
+      uses: actions/cache@v2
+      with:
+        path: |
+          last_run_status
+        key: ${{ github.run_id }}-${{ github.job }}-${{ steps.date.outputs.date }}
+        restore-keys: |
+          ${{ github.run_id }}-${{ github.job }}-
+
+    - name: Set last run status
+      id: last_run_status
+      run: cat last_run_status
+
+    - name: Checkout ref
+      if: steps.last_run_status.outputs.last_run_status != 'success'
+      uses: actions/checkout@v2
+
+    - name: Step
+      if: steps.last_run_status.outputs.last_run_status != 'success'
+      run: |
+        echo "I will pass!"
+        exit 0
+
+    - name: Save run status
+      if: steps.last_run_status.outputs.last_run_status != 'success'
+      run: echo "::set-output name=last_run_status::success" > last_run_status
