@@ -11,9 +11,6 @@ jobs:
       id: date
       run: echo "::set-output name=date::$(date +%s)"
 
-    - name: Set default run status
-      run: echo "::set-output name=last_run_status::default" > last_run_status
-
     - name: Restore last run status
       uses: actions/cache@v2
       with:
@@ -25,7 +22,7 @@ jobs:
 
     - name: Set last run status
       id: last_run_status
-      run: cat last_run_status
+      run: cat last_run_status 2>/dev/null || echo 'default'
 
     - name: Checkout ref
       uses: actions/checkout@v2
@@ -48,9 +45,6 @@ jobs:
       id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
 
-    - name: Set default run status
-      run: echo "::set-output name=last_run_status::default" > last_run_status
-
     - name: Restore last run status
       uses: actions/cache@v2
       with:
@@ -62,7 +56,7 @@ jobs:
 
     - name: Set last run status
       id: last_run_status
-      run: cat last_run_status
+      run: cat last_run_status 2>/dev/null || echo 'default'
 
     - name: Checkout ref
       if: steps.last_run_status.outputs.last_run_status != 'success'
