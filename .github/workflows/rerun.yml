@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Red
     steps:
-    - name: Get current date
-      id: date
+    - id: date
       run: echo "::set-output name=date::$(date +%s)"
 
     - name: Restore last run status
@@ -24,8 +23,8 @@ jobs:
       id: last_run_status
       run: cat last_run_status 2>/dev/null || echo 'default'
 
-    - name: Checkout ref
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      if: steps.last_run_status.outputs.last_run_status != 'success'
 
     - name: Step
       if: steps.last_run_status.outputs.last_run_status != 'success'
@@ -41,8 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Green
     steps:
-    - name: Get current date
-      id: date
+    - id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
 
     - name: Restore last run status
@@ -58,9 +56,8 @@ jobs:
       id: last_run_status
       run: cat last_run_status 2>/dev/null || echo 'default'
 
-    - name: Checkout ref
+    - uses: actions/checkout@v2
       if: steps.last_run_status.outputs.last_run_status != 'success'
-      uses: actions/checkout@v2
 
     - name: Step
       if: steps.last_run_status.outputs.last_run_status != 'success'
